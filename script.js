@@ -130,7 +130,7 @@ document.getElementById('btnSubmit').addEventListener('click', () => {
         if (currentFrame < totalFrames) {
             // Troca a imagem para o próximo frame
             document.getElementById('movieFrame').src = frames[currentFrame];
-            feedback.textContent = "Resposta errada! Restão apenas " + --frames.length + " chance(s).";
+            feedback.textContent = "Resposta errada! Restam apenas " + (totalFrames - currentFrame) + " chance(s).";
             feedback.style.color = "red"; // Feedback negativo
             updateButtons(); // Atualiza o estado dos botões (caso seja necessário)
         } else {
@@ -175,10 +175,10 @@ function img4(){
     document.getElementById('movieFrame').src = "img/img4.png"
 }
 function img5(){
-    document.getElementById('movieFrame').src = "img/img5.png"
+    document.getElementById('movieFrame').src = "img/img5.png";
 }
 function img6(){
-    document.getElementById('movieFrame').src = "img/img6.png"
+    document.getElementById('movieFrame').src = "img/img6.png";
 }
 
 // Seleciona o elemento de imagem e os botões de fase
