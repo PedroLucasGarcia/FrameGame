@@ -10,13 +10,13 @@ body {
 .frame {
     display: flex;
     justify-content: center;
+    align-items: center;
 }
 .frame img {
-    width: 500px;
-    height: 250px;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
-    background-position: center;
+    width: 600px;
+    height: 300px;
+    object-fit: contain;
+    background-color: black;
 }
 
 /*FRAME FASE*/
@@ -53,6 +53,9 @@ body {
 }
 
 /*GAME CONTAINER*/
+input:hover{
+    border: none;
+}
 .input-container{
     display: flex;
     justify-content: center;
@@ -60,6 +63,9 @@ body {
 }
 .input-section {
     position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 .input-section i {
     position: absolute;
@@ -69,7 +75,7 @@ body {
     color: #aaa;
 }
 .movie-name {
-    width: 380px;
+    width: 475px;
     height: 35px;
     padding-left: 35px;
     font-size: 0.9rem;
@@ -93,8 +99,8 @@ body {
     position: absolute;
     top: 40px;
     left: 35px;
-    width: 380px;
-    max-height: 300px;
+    width: 530px;
+    max-height: 235px;
     background-color: #fff;
     color: #000;
     overflow-y: auto;
@@ -150,4 +156,89 @@ body {
 
 #nextLevel{
     display: none;
+}
+
+@media screen and (max-width: 389.99px) {
+    .frame img {
+        width: 320px;
+        height: 160px;
+    }
+
+    .input-section i {
+        display: none;
+    }
+
+    .movie-name {
+        width: 255px;
+        height: 32px;
+        padding-left: 5px;
+        font-size: 0.7rem;
+    }
+    
+    .btn-submit {
+        width: 60px;
+        height: 32px;
+        font-size: 0.8rem;
+    }
+
+    .suggestions-list {
+        left: 5px;
+        width: 310px;
+        font-size: 0.9rem;
+    }
+
+    #feedBack{
+        width: 320px;
+        font-size: 1rem;
+    }
+}
+
+@media (min-width: 390px) and (max-width: 539.99px) {
+    .frame img {
+        width: 380px;
+        height: 190px;
+    }
+
+    .input-section i {
+        display: block;
+    }
+
+    .movie-name {
+        width: 275px;
+        height: 35px;
+        padding-left: 35px;
+        font-size: 0.8rem;
+    }
+    
+    .btn-submit {
+        width: 70px;
+        height: 35px;
+    }
+
+    .suggestions-list {
+        left: 5px;
+        width: 370px;
+        font-size: 1rem;
+    }
+
+    #feedBack{
+        width: 380px;
+        font-size: 1rem;
+    }
+}
+
+@media screen and (max-height: 429.99px) {
+    .frame img {
+        width: 500px;
+        height: 250px;
+    }
+
+    .movie-name {
+        width: 375px;
+    }
+
+    .suggestions-list {
+        width: 430px;
+        max-height: 150px;
+    }
 }
