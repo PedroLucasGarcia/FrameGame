@@ -124,3 +124,30 @@ body {
     font-size: 1.2rem;
     margin-top: 10px;
 }
+
+.next-level{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+}
+.next-level button{
+    width: 150px;
+    padding: 5px 0;
+    background-color: #2d7047;
+    cursor: pointer;
+    border: none;
+}
+.next-level a{
+    font-size: 1.1rem;
+    padding: 21px;
+    color: #fff;
+    text-decoration: none;
+}
+.next-level button:hover{
+    background-color: #1f4d30;
+}
+
+#nextLevel{
+    display: none;
+}
