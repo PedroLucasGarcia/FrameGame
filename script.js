@@ -63,7 +63,6 @@ const movieList = [
     "Mad Max: Estrada da Fúria (2015)"
 ];
 
-const correctAnswer = "Seven - Os sete pecados capitais (1995)"; // Resposta correta do filme
 const movieInput = document.getElementById('movieName'); // Input onde o usuário digita o nome do filme
 const suggestionsBox = document.getElementById('movie-suggestions'); // Div onde as sugestões de filmes serão exibidas
 let currentFrame = 0; // Índice do frame atual
@@ -117,12 +116,14 @@ document.getElementById('btnSubmit').addEventListener('click', () => {
     // Elemento de feedback para o usuário
     const feedback = document.getElementById('feedBack');
 
+
     // Verifica se a resposta está correta
     if (userAnswer === correctAnswer.toLowerCase()) {
         // Se a resposta estiver correta, exibe feedback positivo e desativa o input e o botão
         feedback.textContent = "Parabéns, você acertou! O filme é: " + correctAnswer;
         feedback.style.color = "green";
         disableInput(); // Desativa o input e o botão após acerto
+        nextLevel(); // Adicione essa linha para prosseguir para o próximo nível
     } else {
         // Se a resposta estiver errada, avança para o próximo frame e exibe feedback negativo
         currentFrame++; // Avança para o próximo frame em caso de erro
@@ -140,6 +141,13 @@ document.getElementById('btnSubmit').addEventListener('click', () => {
         }
     }
 });
+
+// Função para prosseguir para o próximo nível
+function nextLevel() {
+    // Código para prosseguir para o próximo nível
+    document.getElementById('nextLevel').style.display = 'block'; // Exibe o botão de próximo nível
+    // Inicialize o próximo nível aqui
+}
 
 // Função para atualizar os botões que mostram as fases dos frames
 function updateButtons() {
