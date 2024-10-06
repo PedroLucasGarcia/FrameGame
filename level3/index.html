@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FrameGame</title>
+    <link rel="stylesheet" href="../style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+    <div class="frame">
+        <img id="movieFrame" src="img/img1.png" alt="Movie Frame">
+    </div>
+
+    <div class="frameFase">
+        <button type="button" class="frameFase1" data-image="img1.png" onclick="img1()">1</button>
+        <button type="button" class="frameFase2" data-image="img2.png" onclick="img2()">2</button>
+        <button type="button" class="frameFase3" data-image="img3.png" onclick="img3()">3</button>
+        <button type="button" class="frameFase4" data-image="img4.png" onclick="img4()">4</button>
+        <button type="button" class="frameFase5" data-image="img5.png" onclick="img5()">5</button>
+        <button type="button" class="frameFase6" data-image="img6.png" onclick="img6()">6</button>
+    </div>
+
+    <div class="game-container">
+        <div class="input-container">
+            <div class="input-section">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input id="movieName" class="movie-name" type="text" autocomplete="off" placeholder="Digite o nome do filme">
+                <div id="movie-suggestions" class="suggestions-list"></div>
+                <button type="button" class="btn-submit" id="btnSubmit">ENVIAR</button>
+            </div>
+        </div>
+        <div class="feedback"><p id="feedBack"></p></div>
+
+        <div class="next-level">
+            <button type="button" id="nextLevel"><a href="../level4/index.html">Próximo nível</a></button>
+        </div>
+    </div>
+
+    <script>const correctAnswer = "Jurassic Park: O Parque dos Dinossauros (1993)"; // Resposta correta do filme</script>
+    <script src="../script.js"></script>
+</body>
+</html>
