@@ -42,6 +42,7 @@ const movieList = [
     "Interestelar (2014)",
     "Amnésia (2000)",
     "Os Suspeitos (1995)",
+    "Detona Ralph (2012)",
     "La La Land: Cantando Estações (2016)",
     "O Grande Hotel Budapeste (2014)",
     "Whiplash: Em Busca da Perfeição (2014)",
@@ -127,6 +128,7 @@ document.getElementById('btnSubmit').addEventListener('click', () => {
     } else {
         // Se a resposta estiver errada, avança para o próximo frame e exibe feedback negativo
         currentFrame++; // Avança para o próximo frame em caso de erro
+        movieInput.value = ''; // Zera o valor do input com id movieName
         if (currentFrame < totalFrames) {
             // Troca a imagem para o próximo frame
             document.getElementById('movieFrame').src = frames[currentFrame];
@@ -135,7 +137,7 @@ document.getElementById('btnSubmit').addEventListener('click', () => {
             updateButtons(); // Atualiza o estado dos botões (caso seja necessário)
         } else {
             // Se o jogador errar todas as tentativas, exibe feedback final e desativa o input e o botão
-            feedback.textContent = "Você perdeu! O filme correto era: " + correctAnswer;
+            feedback.textContent = "Você perdeu! O filme correto era: " + correctAnswer + '.';
             feedback.style.color = "red"; // Feedback final
             disableInput(); // Desativa o input e o botão após o fim do jogo
         }
