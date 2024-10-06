@@ -1,0 +1,249 @@
+* {
+    margin: 0;
+    padding: 0;
+}
+body {
+    background-color: rgb(15 23 42);
+}
+
+/*CONTAINER*/
+.container{
+    margin-top: 20px;
+}
+
+/*FRAME*/
+.frame {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.frame img {
+    width: 600px;
+    height: 300px;
+    object-fit: contain;
+    background-color: black;
+}
+
+/*FRAME FASE*/
+.frameFase {
+    display: flex;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    justify-content: center;
+}
+.frameFase1, .frameFase2, .frameFase3, .frameFase4, .frameFase5, .frameFase6 {
+    width: 30px;
+    height: 40px;
+    margin-left: 10px;
+    text-align: center;
+    font-size: 1.2rem;
+    border: 1px solid #fff;
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: rgb(15 23 42);
+    color: #fff;
+}
+.frameFase2, .frameFase3, .frameFase4, .frameFase5, .frameFase6 {
+    display: none;
+}
+
+#movieOption {
+  /* adicione aqui as propriedades de estilo desejadas */
+  font-size: 16px;
+  color: #333;
+  background-color: #f0f0f0;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+}
+
+/*GAME CONTAINER*/
+input:hover{
+    border: none;
+}
+.input-container{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.input-section {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.input-section i {
+    position: absolute;
+    left: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #aaa;
+}
+.movie-name {
+    width: 475px;
+    height: 35px;
+    padding-left: 35px;
+    font-size: 0.9rem;
+    border: none;
+}
+
+.btn-submit {
+    width: 90px;
+    height: 35px;
+    cursor: pointer;
+    border: none;
+    background-color: #2d7047;
+    color: #fff;
+}
+.btn-submit:hover {
+    background-color: #1f4d30;
+}
+
+/* SUGGESTIONS LIST */
+.suggestions-list {
+    position: absolute;
+    top: 40px;
+    left: 35px;
+    width: 530px;
+    max-height: 235px;
+    background-color: #fff;
+    color: #000;
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    display: none;
+    z-index: 10;
+}
+
+.suggestions-list div {
+    padding: 10px;
+    cursor: pointer;
+}
+
+.suggestions-list div:hover {
+    background-color: #f1f1f1;
+}
+
+/*FEEDBACK*/
+.feedback {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+#feedBack{
+    width: 500px;
+    text-align: center;
+    font-size: 1.2rem;
+    margin-top: 10px;
+}
+
+.next-level{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+}
+.next-level button{
+    width: 150px;
+    padding: 5px 0;
+    background-color: #2d7047;
+    cursor: pointer;
+    border: none;
+}
+.next-level a{
+    font-size: 1.1rem;
+    padding: 21px;
+    color: #fff;
+    text-decoration: none;
+}
+.next-level button:hover{
+    background-color: #1f4d30;
+}
+
+#nextLevel{
+    display: none;
+}
+
+@media screen and (max-width: 389.99px) {
+    .frame img {
+        width: 320px;
+        height: 160px;
+    }
+
+    .input-section i {
+        display: none;
+    }
+
+    .movie-name {
+        width: 255px;
+        height: 32px;
+        padding-left: 5px;
+        font-size: 0.7rem;
+    }
+    
+    .btn-submit {
+        width: 60px;
+        height: 32px;
+        font-size: 0.8rem;
+    }
+
+    .suggestions-list {
+        left: 5px;
+        width: 310px;
+        font-size: 0.9rem;
+    }
+
+    #feedBack{
+        width: 320px;
+        font-size: 1rem;
+    }
+}
+
+@media (min-width: 390px) and (max-width: 539.99px) {
+    .frame img {
+        width: 380px;
+        height: 190px;
+    }
+
+    .input-section i {
+        display: block;
+    }
+
+    .movie-name {
+        width: 275px;
+        height: 35px;
+        padding-left: 35px;
+        font-size: 0.8rem;
+    }
+    
+    .btn-submit {
+        width: 70px;
+        height: 35px;
+    }
+
+    .suggestions-list {
+        left: 5px;
+        width: 370px;
+        font-size: 1rem;
+    }
+
+    #feedBack{
+        width: 380px;
+        font-size: 1rem;
+    }
+}
+
+@media screen and (max-height: 429.99px) {
+    .frame img {
+        width: 500px;
+        height: 250px;
+    }
+
+    .movie-name {
+        width: 375px;
+    }
+
+    .suggestions-list {
+        width: 430px;
+        max-height: 150px;
+    }
+}

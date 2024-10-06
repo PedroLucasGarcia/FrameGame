@@ -6,6 +6,11 @@ body {
     background-color: rgb(15 23 42);
 }
 
+/*CONTAINER*/
+.container{
+    margin-top: 20px;
+}
+
 /*FRAME*/
 .frame {
     display: flex;
