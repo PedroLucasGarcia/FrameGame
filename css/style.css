@@ -20,7 +20,7 @@ ul{
     align-items: center;
     justify-content: space-between;
     padding: 0 30px;
-    height: 12vh;
+    height: 10vh;
 }
 /*Menu de navegação*/
 .nav-links{
@@ -31,7 +31,7 @@ ul{
 a{
     text-decoration: none; 
     color: #fff;
-    font-size: 1.2rem;   
+    font-size: 1.5rem;   
 }
 .logo{
     display: flex;
@@ -44,13 +44,13 @@ a{
 
 /*LEVEL*/
 #level-select{
-    display: none;
-    padding: 20px 0;
+    z-index: 1;
+    padding: 20px 0px;
     position: fixed;
-    top: 12vh;
+    top: 10vh;
     right: 0;
     width: 100%;
-    height: 100vh;
+    height: 84vh;
     transition: all 0.3s ease-in-out;
     background-color: rgb(15 23 42);
 }
@@ -61,14 +61,21 @@ a{
 }
 
 .button-container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    margin: 0 50px;
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    max-width: 100%;
+    overflow-y: auto;
+    max-height: 400px;
+    gap: 5px;
+    margin: 0 auto; /* adiciona margin 0 ao topo e ao fundo, e auto aos lados */
+    position: absolute; /* posiciona o container absolutamente */
+    top: 50%; /* posiciona o container 50% do topo da página */
+    left: 50%; /* posiciona o container 50% da esquerda da página */
+    transform: translate(-50%, -50%); /* ajusta a posição para que o container fique no centro */
 }
 .buttonLevel{
-    width: 50px;
-    height: 50px;
+    width: 60px;
+    height: 60px;
     margin: 5px;
     text-align: center;
     font-size: 1.2rem;
@@ -79,16 +86,28 @@ a{
     color: #fff;
     opacity: 0.6;
 }
-.buttonLevel:hover{
+.current{
+    border: 1px solid #fff;
+    color: #fff;
+    opacity: 0.6;
+}
+.current:hover, .completed:hover{
     opacity: 1;
 }
-.buttonLevel a {
-    padding: 20px;
+.locked{
+    border: 1px solid wheat;
+    color: white;
+    opacity: 0.3;
+    cursor: default;
+}
+.completed{
+    border: 1px solid green;
+    color: green;
 }
 
 /*TEXT*/
 .container-text{
-    padding: 50px 80px 30px 80px;
+    padding: 50px 200px 30px 200px;
 }
 .container-text h2{
     color: #fff;
@@ -138,8 +157,8 @@ a{
 }
 
 @media screen and (max-width: 399.99px) {
-    .container-text{
-        padding: 30px 20px;
+    a{
+        font-size: 1rem;   
     }
     .container-text h2{
         font-size: 1.5rem;
@@ -147,13 +166,50 @@ a{
     .container-text p{
         font-size: 0.8rem;
     }
-    .container-text .img{
-        display: flex;
-        align-items: center;
-        justify-content: center;
+    .img img{
+        width: 300px;
+        height: 150px;
+    }
+}
+
+@media screen and (max-width: 499.99px) {
+    .nav{
+        padding: 0 15px;
+    }
+    .container-text{
+        padding: 30px 20px;
+    }
+    .button-container {
+        grid-template-columns: repeat(5, 1fr);
+    }
+    .buttonLevel{
+        width: 50px;
+        height: 50px;
+    }
+}
+
+@media screen and (max-height: 499.99px) {
+    .nav{
+        height: 15vh;
+    }
+    a{
+        font-size: 1rem;   
+    }
+    .container-text h2{
+        font-size: 1.5rem;
+    }
+    .container-text p{
+        font-size: 0.8rem;
     }
     .img img{
         width: 300px;
         height: 150px;
+    }
+    #level-select{
+        top: 15vh;
+    }
+    .button-container {
+        max-height: 200px;
+        grid-template-columns: repeat(5, 1fr);
     }
 }

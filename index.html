@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FameGame</title>
+    <title>FrameGame</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -14,32 +15,15 @@
             </div>
             <div>
                 <ul class="nav-links">
-                    <li><a href="#" id="levels-link">Níveis</a></li>
-                    <li><a href="#">Info</a></li>
+                    <li><a href="selectLevel/selectLevel.html" id="levels-link"><i class="fa-solid fa-grip-vertical"></i></a></li>
+                    <li><a href="#"><i class="fa-regular fa-circle-question"></i></a></li>
                 </ul>
-            </div>
-            <!-- Adicione um elemento div para conter a caixa de seleção de níveis -->
-            <div id="level-select">
-                <h2>Selecione um nível</h2>
-                <div class="button-container">
-                    <!-- Botões de níveis serão adicionados aqui -->
-                    <button type="button" class="buttonLevel"><a href="level1/level1.html">1</a></button>
-                    <button type="button" class="buttonLevel"><a href="level2/level2.html">2</a></button>
-                    <button type="button" class="buttonLevel"><a href="level3/level3.html">3</a></button>
-                    <button type="button" class="buttonLevel"><a href="level4/level4.html">4</a></button>
-                    <button type="button" class="buttonLevel"><a href="level5/level5.html">5</a></button>
-                    <button type="button" class="buttonLevel"><a href="level6/level6.html">6</a></button>
-                    <button type="button" class="buttonLevel"><a href="level7/level7.html">7</a></button>
-                    <button type="button" class="buttonLevel"><a href="level8/level8.html">8</a></button>
-                    <button type="button" class="buttonLevel"><a href="level9/level9.html">9</a></button>
-                    <button type="button" class="buttonLevel"><a href="level10/level10.html">10</a></button>
-                </div>
             </div>
         </nav>
     </header>
 
     <div class="container-text">
-        <h2>Será que você consegue adivinhar o filme vendo apenas uma imagem?</h2>
+        <h2>Será que você consegue acertar o filme vendo apenas uma imagem?</h2>
         <p>Você terá 6 chances! Se não souber na primeira, poderá passar para a próxima imagem até chegar à sexta e última. Mas cuidado: se não acertar o nome do filme... é game over!</p>
         <div class="img">
             <img src="img/home.gif" alt="">
@@ -47,7 +31,7 @@
     </div>
 
     <div class="container-startGame">
-        <button class="startGame"><a href="level1/level1.html">Jogar agora</a></button>
+        <button class="startGame"><a href="selectLevel/selectLevel.html">Jogar agora</a></button>
     </div>
 
     <script src="js/script.js"></script>

@@ -6,11 +6,6 @@ body {
     background-color: rgb(15 23 42);
 }
 
-/*CONTAINER*/
-.container{
-    margin-top: 20px;
-}
-
 /*FRAME*/
 .frame {
     display: flex;
@@ -48,7 +43,6 @@ body {
 }
 
 #movieOption {
-  /* adicione aqui as propriedades de estilo desejadas */
   font-size: 16px;
   color: #333;
   background-color: #f0f0f0;
@@ -80,7 +74,7 @@ input:hover{
     color: #aaa;
 }
 .movie-name {
-    width: 475px;
+    width: 380px;
     height: 35px;
     padding-left: 35px;
     font-size: 0.9rem;
@@ -88,7 +82,7 @@ input:hover{
 }
 
 .btn-submit {
-    width: 90px;
+    width: 85px;
     height: 35px;
     cursor: pointer;
     border: none;
@@ -104,7 +98,7 @@ input:hover{
     position: absolute;
     top: 40px;
     left: 35px;
-    width: 530px;
+    width: 430px;
     max-height: 235px;
     background-color: #fff;
     color: #000;

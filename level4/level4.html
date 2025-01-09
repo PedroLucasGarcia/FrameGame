@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FrameGame</title>
+    <title>FrameGame - Level 4</title>
     <link rel="stylesheet" href="../css/style.css">
     <link rel="stylesheet" href="../css/styleLevel.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -16,30 +16,13 @@
             </div>
             <div>
                 <ul class="nav-links">
-                    <li><a href="#" id="levels-link">Níveis</a></li>
-                    <li><a href="#">Info</a></li>
+                    <li><a href="../selectLevel/selectLevel.html" id="levels-link"><i class="fa-solid fa-grip-vertical"></i></a></li>
+                    <li><a href="#"><i class="fa-regular fa-circle-question"></i></a></li>
                 </ul>
-            </div>
-            <!-- Adicione um elemento div para conter a caixa de seleção de níveis -->
-            <div id="level-select">
-                <h2>Selecione um nível</h2>
-                <div class="button-container">
-                    <!-- Botões de níveis serão adicionados aqui -->
-                    <button type="button" class="buttonLevel"><a href="../level1/level1.html">1</a></button>
-                    <button type="button" class="buttonLevel"><a href="../level2/level2.html">2</a></button>
-                    <button type="button" class="buttonLevel"><a href="../level3/level3.html">3</a></button>
-                    <button type="button" class="buttonLevel"><a href="../level4/level4.html">4</a></button>
-                    <button type="button" class="buttonLevel"><a href="../level5/level5.html">5</a></button>
-                    <button type="button" class="buttonLevel"><a href="../level6/level6.html">6</a></button>
-                    <button type="button" class="buttonLevel"><a href="../level7/level7.html">7</a></button>
-                    <button type="button" class="buttonLevel"><a href="../level8/level8.html">8</a></button>
-                    <button type="button" class="buttonLevel"><a href="../level9/level9.html">9</a></button>
-                    <button type="button" class="buttonLevel"><a href="../level10/level10.html">10</a></button>
-                </div>
-            </div>
+            </div>           
         </nav>
     </header>
-
+    
     <div class="container">
         <div class="frame">
             <img id="movieFrame" src="img/img1.png" alt="Movie Frame">
@@ -66,13 +49,39 @@
             <div class="feedback"><p id="feedBack"></p></div>
     
             <div class="next-level">
-                <button type="button" id="nextLevel"><a href="../level5/l.html">Próximo nível</a></button>
+                <button type="button" id="nextLevel"><a href="../level5/level5.html">Próximo nível</a></button>
             </div>
         </div>
     </div>
 
+    <script>const correctAnswer = "O Rei Leão (1994)";</script>
     <script src="../js/script.js"></script>
     <script src="../js/scriptLevel.js"></script>
-    <script>const correctAnswer = "O Rei Leão (1994)"; // Resposta correta do filme</script>
+    <script>
+        document.getElementById('nextLevel').addEventListener('click', function() { 
+            // Obtém o nível atual e o nível desbloqueado mais alto salvo no localStorage
+            let currentLevel = 4; // Substitua pelo nível atual da fase em questão
+            let unlockedLevels = localStorage.getItem('unlockedLevels') ? parseInt(localStorage.getItem('unlockedLevels')) : 1;
+
+            // Se o nível atual for maior que o nível desbloqueado, atualiza o progresso
+            if (currentLevel >= unlockedLevels) {
+                unlockedLevels = currentLevel + 1; // Desbloqueia o próximo nível
+                localStorage.setItem('unlockedLevels', unlockedLevels);
+            }
+
+            // Redireciona para o próximo nível baseado no nível atual
+            window.location.href = `level${currentLevel + 1}.html`;
+        });
+
+        // Função que marca a conclusão de um nível
+        function levelCompleted(level) {
+            let unlockedLevels = localStorage.getItem('unlockedLevels') ? parseInt(localStorage.getItem('unlockedLevels')) : 1;
+            
+            // Se o nível completado for maior que os níveis desbloqueados, atualiza o progresso
+            if (level >= unlockedLevels) {
+                localStorage.setItem('unlockedLevels', level + 1);
+            }
+        }
+    </script>
 </body>
 </html>
