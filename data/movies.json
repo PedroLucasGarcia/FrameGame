@@ -1,0 +1,13 @@
+{
+  "startDate": "2026-11-08",
+  "timeZone": "America/Sao_Paulo",
+  "days": [
+    { "day": 1, "title": "Titanic", "year": 1997, "tmdbId": 597, "aliases": ["Titanic"], "frames": ["frames/1/1.png", "frames/1/2.png", "frames/1/3.png", "frames/1/4.png", "frames/1/5.png", "frames/1/6.png"] },
+    { "day": 2, "title": "Detona Ralph", "year": 2012, "tmdbId": 82690, "aliases": ["Wreck-It Ralph"], "frames": ["frames/2/1.png", "frames/2/2.png", "frames/2/3.png", "frames/2/4.png", "frames/2/5.png", "frames/2/6.png"] },
+    { "day": 3, "title": "Jurassic Park: O Parque dos Dinossauros", "year": 1993, "tmdbId": 329, "aliases": ["Jurassic Park"], "frames": ["frames/3/1.png", "frames/3/2.png", "frames/3/3.png", "frames/3/4.png", "frames/3/5.png", "frames/3/6.png"] },
+    { "day": 4, "title": "O Rei Leão", "year": 1994, "tmdbId": 8587, "aliases": ["The Lion King"], "frames": ["frames/4/1.png", "frames/4/2.png", "frames/4/3.png", "frames/4/4.png", "frames/4/5.png", "frames/4/6.png"] },
+    { "day": 5, "title": "Matrix", "year": 1999, "tmdbId": 603, "aliases": ["The Matrix"], "frames": ["frames/5/1.png", "frames/5/2.png", "frames/5/3.png", "frames/5/4.png", "frames/5/5.png", "frames/5/6.png"] },
+    { "day": 6, "title": "Os Vingadores", "year": 2012, "tmdbId": 24428, "aliases": ["The Avengers", "Os Vingadores: The Avengers"], "frames": ["frames/6/1.png", "frames/6/2.png", "frames/6/3.png", "frames/6/4.png", "frames/6/5.png", "frames/6/6.png"] },
+    { "day": 7, "title": "De Volta para o Futuro", "year": 1985, "tmdbId": 105, "aliases": ["Back to the Future"], "frames": ["frames/7/1.png", "frames/7/2.png", "frames/7/3.png", "frames/7/4.png", "frames/7/5.png", "frames/7/6.png"] }
+  ]
+}

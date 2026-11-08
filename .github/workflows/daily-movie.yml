@@ -1,0 +1,41 @@
+name: Filme do dia
+
+on:
+  schedule:
+    - cron: '0 2 * * *'   # 23:00 em Brasília, todo dia
+  workflow_dispatch:       # permite rodar manualmente pela aba Actions
+
+permissions:
+  contents: write
+
+concurrency:
+  group: daily-movie
+  cancel-in-progress: false
+
+jobs:
+  add-movie:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Adicionar filmes novos
+        run: node scripts/add-daily-movie.mjs
+        env:
+          TMDB_TOKEN: ${{ secrets.TMDB_TOKEN }}
+          TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
+
+      - name: Salvar no repositório
+        run: |
+          if git diff --quiet -- data; then
+            echo "Nada novo para salvar."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data
+          git commit -m "Filmes do dia $(TZ=America/Sao_Paulo date +%F)"
+          git push
