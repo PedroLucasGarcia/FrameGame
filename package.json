@@ -1,0 +1,8 @@
+{
+  "name": "framegame",
+  "private": true,
+  "description": "Adivinhe o filme do dia vendo apenas uma imagem.",
+  "engines": {
+    "node": "26.x"
+  }
+}
