@@ -1,64 +1,40 @@
 # FrameGame
 
-Adivinhe o filme do dia vendo apenas uma imagem. Inspirado no [Framed](https://framed.wtf).
+FrameGame é um jogo diário de adivinhar filmes. A cada dia surge um filme novo, e o desafio é descobrir qual é vendo apenas cenas dele.
+
+## Como jogar
+
+- Você tem **6 chances** para acertar o filme.
+- A cada erro ou pulo, uma nova cena é revelada, com mais pistas.
+- O campo de palpite sugere títulos enquanto você digita.
+- Ao terminar, dá para **compartilhar o resultado** com quadradinhos 🟥🟩 sem revelar a resposta.
+
+## Recursos
 
 - **Um filme novo por dia**, liberado à meia-noite (horário de Brasília).
-- **6 chances**: a cada erro ou pulo, uma nova cena é revelada.
-- **Jogos anteriores**: quem chegou depois pode jogar todos os dias que já passaram (ícone de calendário).
-- **Progresso salvo no navegador** (`localStorage`): palpites, vitórias, sequência e distribuição de acertos.
-- **Compartilhar** o resultado com quadradinhos 🟥🟩, como no Framed.
-- Layout responsivo para celular, tablet e desktop.
+- **Jogos anteriores**: quem chegou depois pode jogar todos os dias que já passaram.
+- **Estatísticas**: vitórias, sequência atual, melhor sequência e distribuição de acertos.
+- **Progresso salvo no navegador**, sem cadastro ou login.
+- **Layout responsivo** para celular, tablet e computador.
 
-## Como funciona
+## Como o projeto funciona
 
-| Arquivo | Para que serve |
-|---|---|
-| `index.html`, `css/style.css`, `js/app.js` | O jogo (site estático, sem build) |
-| `data/movies.json` | Lista de filmes por dia (`startDate` = dia 1) |
-| `data/titles.json` | Títulos usados no autocompletar |
-| `frames/1..7/` | Imagens dos 7 primeiros filmes (as antigas fases) |
-| `scripts/add-daily-movie.mjs` | Busca filmes novos no TMDB |
-| `.github/workflows/daily-movie.yml` | Roda o script todo dia |
+- O site é estático: HTML, CSS e JavaScript puro, sem framework e sem etapa de build.
+- Os filmes de cada dia ficam em uma lista em JSON, numerada a partir da data de estreia do jogo.
+- Um workflow do GitHub Actions roda todos os dias e adiciona filmes novos automaticamente usando a API do TMDB.
+- As cenas são carregadas direto do CDN do TMDB, então o repositório não cresce com imagens novas.
+- Publicado na Vercel, que atualiza o site a cada commit.
 
-O número do dia é calculado a partir de `startDate` no fuso `America/Sao_Paulo`. O site mostra só os dias que já chegaram, mesmo que o JSON tenha filmes futuros.
+## Tecnologias
 
-### Imagens sem pesar o repositório
-
-Os filmes novos **não têm imagens salvas no projeto**. O script guarda apenas os links do CDN do TMDB (`https://image.tmdb.org/t/p/w1280/...`), então cada dia novo acrescenta só uma linha de texto ao `movies.json`.
-
-## Atualização automática (uma vez só)
-
-1. Crie uma conta grátis em [themoviedb.org](https://www.themoviedb.org/signup) e vá em **Configurações → API**. Copie o **Token de leitura da API** (o token longo, "v4").
-2. No GitHub, abra o repositório → **Settings → Secrets and variables → Actions → New repository secret**:
-   - Nome: `TMDB_TOKEN`
-   - Valor: o token copiado
-3. Em **Settings → Actions → General → Workflow permissions**, marque **Read and write permissions**.
-4. Na aba **Actions**, abra **Filme do dia** e clique em **Run workflow** para testar.
-
-Depois disso, todo dia às 23h (Brasília) o workflow garante que existam filmes para os próximos 3 dias e faz o commit sozinho.
-
-> Os títulos dos filmes futuros ficam visíveis no `data/movies.json`. Quem abrir o arquivo pode ver as respostas — o mesmo acontece em vários jogos diários.
-
-## Publicar no GitHub Pages
-
-**Settings → Pages → Build and deployment → Deploy from a branch → `main` / `(root)`**. Cada commit do workflow publica o site de novo.
-
-## Rodar localmente
-
-O jogo carrega arquivos JSON, então precisa de um servidor (abrir o `index.html` direto não funciona):
-
-```bash
-python -m http.server 8000
-```
-
-Abra `http://localhost:8000`. Para simular outra data, use `http://localhost:8000/?hoje=2026-11-12` (só funciona em localhost).
-
-Para gerar filmes manualmente:
-
-```bash
-TMDB_TOKEN=seu_token node scripts/add-daily-movie.mjs
-```
+- HTML, CSS e JavaScript
+- Node.js (script de atualização diária)
+- GitHub Actions
+- API do TMDB
+- Vercel
 
 ## Créditos
 
 Imagens e dados de filmes: [TMDB](https://www.themoviedb.org/). Este produto usa a API do TMDB, mas não é endossado nem certificado pelo TMDB.
+
+Inspirado no [Framed](https://framed.wtf).
