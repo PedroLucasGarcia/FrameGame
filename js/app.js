@@ -382,6 +382,11 @@
   }
 
   function bindUI() {
+    // logo: recarrega a página e volta para o jogo de hoje
+    document.querySelector(".brand").addEventListener("click", (e) => {
+      e.preventDefault();
+      location.href = location.pathname + location.search;
+    });
     document.querySelectorAll('[data-open]').forEach((b) => b.addEventListener('click', () => openModal(b.dataset.open)));
     document.querySelectorAll('dialog').forEach((d) => {
       d.querySelectorAll('[data-close]').forEach((b) => b.addEventListener('click', () => d.close()));

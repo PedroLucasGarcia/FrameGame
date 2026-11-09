@@ -49,7 +49,8 @@ a { color: var(--accent); }
   backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--border);
 }
-.brand { display: flex; align-items: center; }
+.brand { display: flex; align-items: center; cursor: pointer; border-radius: 8px; }
+.brand:focus-visible { outline: 2px solid var(--accent, #f59e0b); outline-offset: 4px; }
 .brand img { height: 32px; width: auto; display: block; }
 .actions { display: flex; gap: 4px; }
 
