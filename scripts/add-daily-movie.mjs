@@ -81,6 +81,27 @@ async function reorderDay(day) {
   day.ordenado = true;
 }
 
+/**
+ * Troca imagens marcadas em "trocar" (ex.: repetidas) por outras ainda não
+ * usadas, mantendo a posição: posições iniciais recebem imagens menos
+ * conhecidas e as finais, mais conhecidas.
+ */
+async function replaceFrames(day) {
+  const movie = await tmdb(`/movie/${day.tmdbId}`);
+  const { backdrops = [] } = await tmdb(`/movie/${day.tmdbId}/images`, { include_image_language: 'null' });
+  const ranked = rankByEase(backdrops, movie.backdrop_path).map((b) => IMG + b.file_path);
+  const pool = ranked.slice(0, 21);
+  for (const url of day.trocar) {
+    const pos = day.frames.indexOf(url);
+    const free = pool.filter((u) => !day.frames.includes(u));
+    if (pos < 0 || !free.length) continue;
+    const target = Math.round(((day.frames.length - 1 - pos) / (day.frames.length - 1)) * (pool.length - 1));
+    free.sort((a, b) => Math.abs(pool.indexOf(a) - target) - Math.abs(pool.indexOf(b) - target));
+    day.frames[pos] = free[0];
+  }
+  delete day.trocar;
+}
+
 async function nextMovie(used) {
   for (let attempt = 0; attempt < 15; attempt++) {
     const page = 1 + Math.floor(Math.random() * 25); // ~500 filmes mais votados
@@ -139,6 +160,12 @@ for (const day of data.days) {
   await reorderDay(day);
   reordered++;
   console.log(`  dia ${day.day}: imagens reordenadas por dificuldade`);
+}
+for (const day of data.days) {
+  if (!day.trocar || !day.tmdbId) continue;
+  await replaceFrames(day);
+  reordered++;
+  console.log(`  dia ${day.day}: imagens repetidas trocadas`);
 }
 
 console.log(`Hoje é o dia ${today}. Último dia cadastrado: ${last}. Meta: ${target}.`);
