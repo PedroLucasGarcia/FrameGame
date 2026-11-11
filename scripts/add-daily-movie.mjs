@@ -45,6 +45,42 @@ const norm = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().rep
 
 const DISCOVER = { language: 'pt-BR', sort_by: 'vote_count.desc', 'vote_count.gte': '3000', include_adult: 'false' };
 
+/**
+ * Ordena as imagens da mais fácil para a mais difícil de reconhecer.
+ * A imagem principal do filme no TMDB (backdrop_path) e as mais votadas são as
+ * mais icônicas, então entregam o filme; as menos votadas costumam ser cenas
+ * menos conhecidas. Só entram imagens sem texto e com boa resolução.
+ */
+function rankByEase(backdrops, mainPath) {
+  const good = backdrops.filter((b) => b.width >= 1280 && !b.iso_639_1)
+    .sort((a, b) => b.vote_count - a.vote_count || b.vote_average - a.vote_average);
+  const main = good.find((b) => b.file_path === mainPath);
+  return main ? [main, ...good.filter((b) => b !== main)] : good;
+}
+
+/**
+ * Escolhe 6 imagens indo da mais difícil para a mais fácil: as 5 primeiras
+ * saem de faixas cada vez mais conhecidas do ranking e a última é a mais icônica.
+ */
+function pickFrames(ranked) {
+  const rest = ranked.slice(1, 21);
+  const frames = [];
+  for (let i = 4; i >= 0; i--) {
+    frames.push(pick(rest.slice(Math.floor((i * rest.length) / 5), Math.floor(((i + 1) * rest.length) / 5))));
+  }
+  return [...frames, ranked[0]];
+}
+
+/** Reordena as imagens de um dia já cadastrado: mais difícil primeiro. */
+async function reorderDay(day) {
+  const movie = await tmdb(`/movie/${day.tmdbId}`);
+  const { backdrops = [] } = await tmdb(`/movie/${day.tmdbId}/images`, { include_image_language: 'null' });
+  const ranked = rankByEase(backdrops, movie.backdrop_path).map((b) => IMG + b.file_path);
+  const ease = (url) => { const i = ranked.indexOf(url); return i < 0 ? Infinity : i; };
+  day.frames = day.frames.slice().sort((a, b) => ease(b) - ease(a));
+  day.ordenado = true;
+}
+
 async function nextMovie(used) {
   for (let attempt = 0; attempt < 15; attempt++) {
     const page = 1 + Math.floor(Math.random() * 25); // ~500 filmes mais votados
@@ -54,15 +90,14 @@ async function nextMovie(used) {
       const movie = await tmdb(`/movie/${cand.id}`, { language: 'pt-BR' });
       // só imagens sem texto (sem o título do filme escrito)
       const { backdrops = [] } = await tmdb(`/movie/${cand.id}/images`, { include_image_language: 'null' });
-      const good = backdrops.filter((b) => b.width >= 1280).sort((a, b) => b.vote_count - a.vote_count || b.vote_average - a.vote_average);
-      if (good.length < 6) { console.log(`  pulando ${movie.title}: só ${good.length} imagens`); used.add(cand.id); continue; }
+      const ranked = rankByEase(backdrops, movie.backdrop_path);
+      if (ranked.length < 6) { console.log(`  pulando ${movie.title}: só ${ranked.length} imagens`); used.add(cand.id); continue; }
 
-      // 6 imagens entre as 12 mais votadas; a mais icônica fica por último
-      const chosen = shuffle(good.slice(0, 12)).slice(0, 6).sort((a, b) => a.vote_average - b.vote_average || a.vote_count - b.vote_count);
+      const chosen = pickFrames(ranked);
       const title = movie.title || cand.title;
       const year = Number(movie.release_date.slice(0, 4));
       const aliases = [...new Set([movie.original_title].filter((t) => t && norm(t) !== norm(title)))];
-      return { title, year, tmdbId: movie.id, aliases, frames: chosen.map((b) => IMG + b.file_path) };
+      return { title, year, tmdbId: movie.id, aliases, frames: chosen.map((b) => IMG + b.file_path), ordenado: true };
     }
   }
   throw new Error('Não foi possível encontrar um filme novo com imagens suficientes.');
@@ -97,6 +132,15 @@ const target = today + BUFFER_DAYS;
 const used = new Set(data.days.map((d) => d.tmdbId));
 let last = data.days.length ? data.days[data.days.length - 1].day : 0;
 
+// dias antigos (vindos do TMDB) que ainda não foram ordenados por dificuldade
+let reordered = 0;
+for (const day of data.days) {
+  if (day.ordenado || !day.tmdbId || !day.frames.every((f) => f.startsWith(IMG))) continue;
+  await reorderDay(day);
+  reordered++;
+  console.log(`  dia ${day.day}: imagens reordenadas por dificuldade`);
+}
+
 console.log(`Hoje é o dia ${today}. Último dia cadastrado: ${last}. Meta: ${target}.`);
 let added = 0;
 while (last < target) {
@@ -108,6 +152,6 @@ while (last < target) {
   console.log(`  dia ${last}: ${label(movie.title, movie.year)}`);
 }
 
-if (added) await writeFile(MOVIES, serialize(data));
+if (added || reordered) await writeFile(MOVIES, serialize(data));
 const total = await refreshTitles(data);
 console.log(`${added} filme(s) adicionado(s). Autocompletar com ${total} títulos.`);
