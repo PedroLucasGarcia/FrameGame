@@ -15,8 +15,12 @@ import { dirname, join } from 'node:path';
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const MOVIES = join(ROOT, 'data', 'movies.json');
 const TITLES = join(ROOT, 'data', 'titles.json');
+const CANDIDATES = join(ROOT, 'data', 'candidatos.json');
 const BUFFER_DAYS = Number(process.env.BUFFER_DAYS || 3);
+const MIN_IMAGES = 10;      // filmes com menos imagens diferentes que isso são pulados
+const MAX_CANDIDATES = 30;  // imagens oferecidas na página de curadoria
 const IMG = 'https://image.tmdb.org/t/p/w1280';
+const THUMB = 'https://image.tmdb.org/t/p/w300';
 const API = 'https://api.themoviedb.org/3';
 
 const token = process.env.TMDB_TOKEN;
@@ -42,6 +46,63 @@ const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
 const shuffle = (arr) => { const a = arr.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
 const label = (title, year) => `${title} (${year})`;
 const norm = (s) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+
+/**
+ * Comparação visual: a mesma foto às vezes aparece no TMDB como arquivos
+ * diferentes. Cada imagem vira uma "impressão digital" de 64 bits (dHash),
+ * calculada sobre a versão pequena; impressões quase iguais = mesma foto.
+ * Precisa do pacote jpeg-js (o workflow instala); sem ele, a comparação é pulada.
+ */
+let jpeg = null;
+try { jpeg = (await import('jpeg-js')).default; } catch { console.warn('jpeg-js não encontrado: fotos repetidas não serão detectadas.'); }
+const SAME_PHOTO = 10; // bits diferentes (de 64) até onde ainda é a mesma foto
+const hashCache = new Map();
+const fileOf = (url) => url.slice(url.lastIndexOf('/'));
+
+async function dhash(url) {
+  const file = fileOf(url);
+  if (!jpeg) return null;
+  if (hashCache.has(file)) return hashCache.get(file);
+  let hash = null;
+  try {
+    const res = await fetch(THUMB + file);
+    if (res.ok) {
+      const { width, height, data } = jpeg.decode(Buffer.from(await res.arrayBuffer()), { useTArray: true, formatAsRGBA: true });
+      const W = 9, H = 8, sum = new Float64Array(W * H), count = new Uint32Array(W * H);
+      for (let y = 0; y < height; y++) {
+        const row = Math.floor((y * H) / height) * W;
+        for (let x = 0; x < width; x++) {
+          const i = (y * width + x) * 4, cell = row + Math.floor((x * W) / width);
+          sum[cell] += 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+          count[cell]++;
+        }
+      }
+      const g = Array.from(sum, (v, i) => v / (count[i] || 1));
+      hash = [];
+      for (let y = 0; y < H; y++) for (let x = 0; x < W - 1; x++) hash.push(g[y * W + x] < g[y * W + x + 1]);
+    }
+  } catch (e) { console.warn(`  não deu para comparar ${file}: ${e.message}`); }
+  hashCache.set(file, hash);
+  return hash;
+}
+
+const samePhoto = (a, b) => {
+  if (!a || !b) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) diff++;
+  return diff <= SAME_PHOTO;
+};
+
+/** Tira da lista (já ordenada) as imagens que repetem uma foto anterior. */
+async function uniquePhotos(urls, limit = 40) {
+  const kept = [];
+  for (const url of urls) {
+    if (kept.length >= limit) break;
+    const h = await dhash(url);
+    if (!kept.some((k) => samePhoto(k.h, h))) kept.push({ url, h });
+  }
+  return kept.map((k) => k.url);
+}
 
 const DISCOVER = { language: 'pt-BR', sort_by: 'vote_count.desc', 'vote_count.gte': '3000', include_adult: 'false' };
 
@@ -71,11 +132,20 @@ function pickFrames(ranked) {
   return [...frames, ranked[0]];
 }
 
+/** Imagens do filme, da mais fácil para a mais difícil, sem fotos repetidas. */
+const rankedCache = new Map();
+async function rankedImages(id, mainPath) {
+  if (rankedCache.has(id)) return rankedCache.get(id);
+  if (mainPath === undefined) mainPath = (await tmdb(`/movie/${id}`)).backdrop_path;
+  const { backdrops = [] } = await tmdb(`/movie/${id}/images`, { include_image_language: 'null' });
+  const ranked = await uniquePhotos(rankByEase(backdrops, mainPath).map((b) => IMG + b.file_path));
+  rankedCache.set(id, ranked);
+  return ranked;
+}
+
 /** Reordena as imagens de um dia já cadastrado: mais difícil primeiro. */
 async function reorderDay(day) {
-  const movie = await tmdb(`/movie/${day.tmdbId}`);
-  const { backdrops = [] } = await tmdb(`/movie/${day.tmdbId}/images`, { include_image_language: 'null' });
-  const ranked = rankByEase(backdrops, movie.backdrop_path).map((b) => IMG + b.file_path);
+  const ranked = await rankedImages(day.tmdbId);
   const ease = (url) => { const i = ranked.indexOf(url); return i < 0 ? Infinity : i; };
   day.frames = day.frames.slice().sort((a, b) => ease(b) - ease(a));
   day.ordenado = true;
@@ -87,13 +157,14 @@ async function reorderDay(day) {
  * conhecidas e as finais, mais conhecidas.
  */
 async function replaceFrames(day) {
-  const movie = await tmdb(`/movie/${day.tmdbId}`);
-  const { backdrops = [] } = await tmdb(`/movie/${day.tmdbId}/images`, { include_image_language: 'null' });
-  const ranked = rankByEase(backdrops, movie.backdrop_path).map((b) => IMG + b.file_path);
-  const pool = ranked.slice(0, 21);
+  const pool = (await rankedImages(day.tmdbId)).slice(0, 21);
   for (const url of day.trocar) {
     const pos = day.frames.indexOf(url);
-    const free = pool.filter((u) => !day.frames.includes(u));
+    const others = await Promise.all(day.frames.filter((_, i) => i !== pos).map(dhash));
+    const free = [];
+    for (const u of pool) {
+      if (!day.frames.includes(u) && !others.some((h) => samePhoto(h, hashCache.get(fileOf(u))))) free.push(u);
+    }
     if (pos < 0 || !free.length) continue;
     const target = Math.round(((day.frames.length - 1 - pos) / (day.frames.length - 1)) * (pool.length - 1));
     free.sort((a, b) => Math.abs(pool.indexOf(a) - target) - Math.abs(pool.indexOf(b) - target));
@@ -109,16 +180,14 @@ async function nextMovie(used) {
     for (const cand of shuffle(results)) {
       if (cand.adult || used.has(cand.id) || !cand.release_date) continue;
       const movie = await tmdb(`/movie/${cand.id}`, { language: 'pt-BR' });
-      // só imagens sem texto (sem o título do filme escrito)
-      const { backdrops = [] } = await tmdb(`/movie/${cand.id}/images`, { include_image_language: 'null' });
-      const ranked = rankByEase(backdrops, movie.backdrop_path);
-      if (ranked.length < 6) { console.log(`  pulando ${movie.title}: só ${ranked.length} imagens`); used.add(cand.id); continue; }
+      // só imagens sem texto, sem fotos repetidas e com variedade suficiente
+      const ranked = await rankedImages(cand.id, movie.backdrop_path);
+      if (ranked.length < MIN_IMAGES) { console.log(`  pulando ${movie.title}: só ${ranked.length} imagens diferentes`); used.add(cand.id); continue; }
 
-      const chosen = pickFrames(ranked);
       const title = movie.title || cand.title;
       const year = Number(movie.release_date.slice(0, 4));
       const aliases = [...new Set([movie.original_title].filter((t) => t && norm(t) !== norm(title)))];
-      return { title, year, tmdbId: movie.id, aliases, frames: chosen.map((b) => IMG + b.file_path), ordenado: true };
+      return { title, year, tmdbId: movie.id, aliases, frames: pickFrames(ranked), ordenado: true };
     }
   }
   throw new Error('Não foi possível encontrar um filme novo com imagens suficientes.');
@@ -154,9 +223,11 @@ const used = new Set(data.days.map((d) => d.tmdbId));
 let last = data.days.length ? data.days[data.days.length - 1].day : 0;
 
 // dias antigos (vindos do TMDB) que ainda não foram ordenados por dificuldade
+// ("curado": escolhido à mão na página de curadoria; o script não mexe mais)
 let reordered = 0;
 for (const day of data.days) {
-  if (day.ordenado || !day.tmdbId || !day.frames.every((f) => f.startsWith(IMG))) continue;
+  if (day.curado && day.trocar) { delete day.trocar; reordered++; }
+  if (day.curado || day.ordenado || !day.tmdbId || !day.frames.every((f) => f.startsWith(IMG))) continue;
   await reorderDay(day);
   reordered++;
   console.log(`  dia ${day.day}: imagens reordenadas por dificuldade`);
@@ -180,5 +251,21 @@ while (last < target) {
 }
 
 if (added || reordered) await writeFile(MOVIES, serialize(data));
+
+// imagens candidatas dos próximos dias, para a página de curadoria (curadoria.html)
+let candidates = {};
+try { candidates = JSON.parse(await readFile(CANDIDATES, 'utf8')); } catch { /* arquivo novo */ }
+const before = JSON.stringify(candidates);
+for (const key of Object.keys(candidates)) if (Number(key) < today) delete candidates[key];
+for (const day of data.days) {
+  if (day.day <= today || day.curado || !day.tmdbId || candidates[day.day] || !day.frames.every((f) => f.startsWith(IMG))) continue;
+  const ranked = await rankedImages(day.tmdbId);
+  candidates[day.day] = [...new Set([...day.frames, ...ranked])].slice(0, Math.max(MAX_CANDIDATES, day.frames.length));
+}
+if (JSON.stringify(candidates) !== before) {
+  const lines = Object.entries(candidates).map(([k, v]) => `  ${JSON.stringify(k)}: ${JSON.stringify(v)}`);
+  await writeFile(CANDIDATES, `{\n${lines.join(',\n')}\n}\n`);
+  console.log(`Imagens candidatas salvas para os dias: ${Object.keys(candidates).join(', ') || 'nenhum'}.`);
+}
 const total = await refreshTitles(data);
 console.log(`${added} filme(s) adicionado(s). Autocompletar com ${total} títulos.`);

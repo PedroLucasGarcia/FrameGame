@@ -22,6 +22,9 @@ jobs:
         with:
           node-version: 24
 
+      - name: Instalar leitor de JPEG (detecta fotos repetidas)
+        run: npm install --no-save --no-audit --no-fund jpeg-js@0.4.4
+
       - name: Adicionar filmes novos
         run: node scripts/add-daily-movie.mjs
         env:
@@ -30,7 +33,7 @@ jobs:
 
       - name: Salvar no repositório
         run: |
-          if git diff --quiet -- data; then
+          if [ -z "$(git status --porcelain -- data)" ]; then
             echo "Nada novo para salvar."
             exit 0
           fi
