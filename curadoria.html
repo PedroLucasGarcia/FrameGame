@@ -89,6 +89,7 @@
   </header>
   <div class="layout">
     <aside>
+      <p class="note" id="progress" style="margin:0 0 8px"></p>
       <label><input type="checkbox" id="showPast"> Mostrar dias anteriores</label>
       <div id="days"></div>
     </aside>
@@ -137,12 +138,14 @@
     persist();
 
     const framesOf = (d) => edits[d.day] || d.frames;
-    const editable = (d) => d.frames.every((f) => f.startsWith(IMG));
     let current = (data.days.find((d) => d.day === today + 1) || data.days.find((d) => d.day >= today) || data.days[data.days.length - 1]).day;
     let selection = [];
 
     function renderList() {
       const showPast = $('#showPast').checked;
+      const ahead = data.days.filter((d) => d.day > today && d.day <= today + 30);
+      const done = ahead.filter((d) => edits[d.day] || d.curado).length;
+      $('#progress').textContent = ahead.length ? `Próximos ${ahead.length} dias: ${done} de ${ahead.length} escolhidos.` : '';
       $('#days').innerHTML = data.days.filter((d) => showPast || d.day >= today).map((d) => {
         const tags = [
           d.day === today ? '<span class="tag">hoje</span>' : '',
@@ -159,11 +162,6 @@
       const d = data.days.find((x) => x.day === current);
       const saved = framesOf(d);
       const head = `<h2>Dia ${d.day} — ${esc(d.title)} (${d.year})</h2>`;
-      if (!editable(d)) {
-        $('#editor').innerHTML = `${head}<p class="note">Este dia usa imagens próprias do repositório (pasta frames/) e não é editado por aqui.</p>
-          <div class="strip" style="margin-top:16px">${saved.map((f, i) => `<div class="slot filled"><img src="${esc(f)}" alt=""><span class="n">${i + 1}</span></div>`).join('')}</div>`;
-        return;
-      }
       const pool = [...new Set([...saved, ...d.frames, ...(candidates[d.day] || [])])];
       const grid = pool.map((u) => `<button class="cand" data-url="${esc(u)}"><img src="${esc(thumb(u))}" alt="" loading="lazy">
           ${saved.includes(u) ? '<span class="now">atual</span>' : ''}
@@ -180,7 +178,7 @@
           ${edits[d.day] ? '<button class="btn" id="undo">Desfazer alteração</button>' : ''}
         </div>
         <h3>Imagens disponíveis (${pool.length})</h3>
-        ${candidates[d.day] ? '' : '<p class="note">Ainda não há imagens extras para este dia — o GitHub Actions gera a lista dos próximos dias toda noite (ou rode o workflow “Filme do dia” manualmente). Por enquanto dá para reordenar as atuais.</p><div style="height:8px"></div>'}
+        ${candidates[d.day] ? '' : '<p class="note">Ainda não há imagens extras para este dia — o GitHub Actions gera a lista de todos os dias toda noite (ou rode o workflow “Filme do dia” manualmente). Por enquanto dá para reordenar as atuais.</p><div style="height:8px"></div>'}
         <div class="grid">${grid}</div>`;
       refresh();
     }
@@ -251,7 +249,12 @@
       const d = data.days.find((x) => x.day === current);
       if (t.id === 'save') {
         if (JSON.stringify(selection) === JSON.stringify(d.frames) && d.curado) delete edits[current]; else edits[current] = selection.slice();
-        persist(); render(); toast(`Dia ${current} salvo neste navegador.`);
+        persist();
+        const saved = current;
+        // segue para o próximo dia ainda não escolhido, para escolher vários de uma vez
+        const next = data.days.find((x) => x.day > current && x.day > today && !edits[x.day] && !x.curado);
+        if (next) select(next.day); else render();
+        toast(`Dia ${saved} salvo neste navegador.${next ? ` Agora: dia ${next.day}.` : ''}`);
       } else if (t.id === 'reset') { selection = framesOf(d).slice(); refresh(); }
       else if (t.id === 'clear') { selection = []; refresh(); }
       else if (t.id === 'undo') { delete edits[current]; persist(); selection = d.frames.slice(); render(); }

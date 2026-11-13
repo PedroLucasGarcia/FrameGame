@@ -16,9 +16,12 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 const MOVIES = join(ROOT, 'data', 'movies.json');
 const TITLES = join(ROOT, 'data', 'titles.json');
 const CANDIDATES = join(ROOT, 'data', 'candidatos.json');
-const BUFFER_DAYS = Number(process.env.BUFFER_DAYS || 3);
+// ~1 mês de filmes já cadastrados à frente, para dar tempo de escolher as imagens
+// de todos de uma vez na página de curadoria
+const BUFFER_DAYS = Number(process.env.BUFFER_DAYS || 35);
 const MIN_IMAGES = 10;      // filmes com menos imagens diferentes que isso são pulados
-const MAX_CANDIDATES = 30;  // imagens oferecidas na página de curadoria
+const MAX_CANDIDATES = 80;  // imagens oferecidas na página de curadoria
+const CANDIDATES_VERSION = 2; // mudou o jeito de gerar a lista? aumente para refazer todos os dias
 const IMG = 'https://image.tmdb.org/t/p/w1280';
 const THUMB = 'https://image.tmdb.org/t/p/w300';
 const API = 'https://api.themoviedb.org/3';
@@ -95,6 +98,9 @@ const samePhoto = (a, b) => {
 
 /** Tira da lista (já ordenada) as imagens que repetem uma foto anterior. */
 async function uniquePhotos(urls, limit = 40) {
+  // calcula as impressões em paralelo (de 8 em 8) antes de comparar
+  const ahead = urls.slice(0, Math.ceil(limit * 1.5));
+  for (let i = 0; i < ahead.length; i += 8) await Promise.all(ahead.slice(i, i + 8).map(dhash));
   const kept = [];
   for (const url of urls) {
     if (kept.length >= limit) break;
@@ -141,6 +147,18 @@ async function rankedImages(id, mainPath) {
   const ranked = await uniquePhotos(rankByEase(backdrops, mainPath).map((b) => IMG + b.file_path));
   rankedCache.set(id, ranked);
   return ranked;
+}
+
+/**
+ * Lista maior para a página de curadoria: aceita também imagens de resolução um
+ * pouco menor (continua sem imagens com texto), sem fotos repetidas.
+ */
+async function candidateImages(id, frames) {
+  const { backdrops = [] } = await tmdb(`/movie/${id}/images`, { include_image_language: 'null' });
+  const urls = backdrops.filter((b) => b.width >= 1000 && !b.iso_639_1)
+    .sort((a, b) => b.vote_count - a.vote_count || b.vote_average - a.vote_average)
+    .map((b) => IMG + b.file_path).filter((u) => !frames.includes(u));
+  return [...frames, ...await uniquePhotos(urls, MAX_CANDIDATES)];
 }
 
 /** Reordena as imagens de um dia já cadastrado: mais difícil primeiro. */
@@ -252,16 +270,25 @@ while (last < target) {
 
 if (added || reordered) await writeFile(MOVIES, serialize(data));
 
-// imagens candidatas dos próximos dias, para a página de curadoria (curadoria.html)
+// imagens candidatas de todos os dias (passados, hoje e futuros), para a página
+// de curadoria (curadoria.html). Cada dia é gerado uma vez; a lista de um dia
+// inclui sempre as imagens que ele usa agora.
 let candidates = {};
 try { candidates = JSON.parse(await readFile(CANDIDATES, 'utf8')); } catch { /* arquivo novo */ }
 const before = JSON.stringify(candidates);
-for (const key of Object.keys(candidates)) if (Number(key) < today) delete candidates[key];
+if (candidates._versao !== CANDIDATES_VERSION) candidates = {};
+delete candidates._versao;
+const known = new Set(data.days.map((d) => String(d.day)));
+for (const key of Object.keys(candidates)) if (!known.has(key)) delete candidates[key];
 for (const day of data.days) {
-  if (day.day <= today || day.curado || !day.tmdbId || candidates[day.day] || !day.frames.every((f) => f.startsWith(IMG))) continue;
-  const ranked = await rankedImages(day.tmdbId);
-  candidates[day.day] = [...new Set([...day.frames, ...ranked])].slice(0, Math.max(MAX_CANDIDATES, day.frames.length));
+  if (!day.tmdbId) continue;
+  const list = candidates[day.day];
+  if (list && day.frames.every((f) => list.includes(f))) continue;
+  candidates[day.day] = list ? [...new Set([...day.frames, ...list])] : await candidateImages(day.tmdbId, day.frames);
+  console.log(`  dia ${day.day}: ${candidates[day.day].length} imagens para a curadoria`);
 }
+const sorted = Object.entries(candidates).sort((a, b) => Number(a[0]) - Number(b[0]));
+candidates = { _versao: CANDIDATES_VERSION, ...Object.fromEntries(sorted) };
 if (JSON.stringify(candidates) !== before) {
   const lines = Object.entries(candidates).map(([k, v]) => `  ${JSON.stringify(k)}: ${JSON.stringify(v)}`);
   await writeFile(CANDIDATES, `{\n${lines.join(',\n')}\n}\n`);
